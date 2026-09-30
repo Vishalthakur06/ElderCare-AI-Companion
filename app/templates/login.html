@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Sign in · ElderCare{% endblock %}
+{% block content %}
+
+<div class="auth">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-mark">♥</div>
+      <h1 style="font-size:26px;margin-bottom:4px;">Welcome back</h1>
+      <p class="muted" style="font-size:14px;">Your everyday care, made simpler.</p>
+    </div>
+
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="mb-3">
+        <label for="email">Email address</label>
+        <input class="form-control" id="email" type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+      </div>
+
+      <div class="mb-4">
+        <label for="password">Password</label>
+        <input class="form-control" id="password" type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+      </div>
+
+      <button class="btn btn-primary btn-lg w-100">Sign in →</button>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--muted);">
+      New here? <a href="{{ url_for('auth.register') }}" style="color:var(--teal);font-weight:600;">Create an account</a>
+    </p>
+  </div>
+</div>
+
+{% endblock %}

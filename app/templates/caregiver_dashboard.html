@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Family Dashboard · ElderCare{% endblock %}
+{% block content %}
+
+<div class="page-title">
+  <div style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(5,150,105,.12);">👨‍👩‍👧</div>
+  <div>
+    <h1 style="margin:0;">Family / Caregiver</h1>
+    <p class="muted" style="margin:0;font-size:14px;">Monitor and support your linked elders.</p>
+  </div>
+</div>
+
+<section class="cardx mb-4">
+  <h2>🔗 Link an Elder Account</h2>
+  <p class="muted mb-3" style="font-size:14px;">Enter the elder's registered email. Sharing remains controlled by the elder.</p>
+  <form method="post" style="display:flex;gap:12px;flex-wrap:wrap;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input class="form-control" type="email" name="email" required placeholder="elder@example.com" style="max-width:320px;">
+    <button class="btn btn-teal">🔗 Link Account</button>
+  </form>
+</section>
+
+{% for e in elders %}
+<section class="cardx mb-3">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+    <div style="width:48px;height:48px;border-radius:50%;background:var(--grad-teal);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:800;flex-shrink:0;">
+      {{ e.name[0].upper() }}
+    </div>
+    <div>
+      <h2 style="margin:0;">{{ e.name }}</h2>
+      <span class="badge badge-green">Linked Elder</span>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div style="background:var(--surface2);border:1px solid var(--line);border-radius:var(--radius);padding:16px;">
+        <h3>💊 Medicines</h3>
+        {% if e.share_medicines %}
+          {% for m in Medicine.query.filter_by(user_id=e.id).all() %}
+          <div class="listrow" style="padding:8px 0;">
+            <span>{{ m.name }}</span>
+            <span class="badge badge-teal">{{ m.times }}</span>
+          </div>
+          {% else %}
+          <p class="muted" style="font-size:13px;">No medicine entries.</p>
+          {% endfor %}
+        {% else %}
+          <p class="muted" style="font-size:13px;">🔒 Medicine sharing is off.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div style="background:var(--surface2);border:1px solid var(--line);border-radius:var(--radius);padding:16px;">
+        <h3>❤️ Health Records</h3>
+        {% if e.share_health %}
+          {% for r in HealthRecord.query.filter_by(user_id=e.id).order_by(HealthRecord.recorded_at.desc()).limit(5).all() %}
+          <div class="listrow" style="padding:8px 0;">
+            <span>{{ r.kind }}: <b>{{ r.value }}</b></span>
+            <span class="muted" style="font-size:12px;">{{ r.recorded_at.strftime('%d %b') }}</span>
+          </div>
+          {% else %}
+          <p class="muted" style="font-size:13px;">No shared readings.</p>
+          {% endfor %}
+        {% else %}
+          <p class="muted" style="font-size:13px;">🔒 Health sharing is off.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% else %}
+<div class="cardx" style="text-align:center;padding:48px;">
+  <div style="font-size:56px;margin-bottom:16px;">👨‍👩‍👧</div>
+  <h2>No linked elders yet</h2>
+  <p class="muted">Enter an elder's email above to link their account.</p>
+</div>
+{% endfor %}
+
+<p class="notice mt-3">Only use this dashboard with the elder's informed permission. Sharing is controlled by the elder in their Settings page.</p>
+
+{% endblock %}

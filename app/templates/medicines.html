@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ t.med_title }} · ElderCare{% endblock %}
+{% block content %}
+
+<div class="page-title">
+  <div style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(8,145,178,.12);">💊</div>
+  <div>
+    <h1 style="margin:0;">{{ t.med_title }}</h1>
+    <p class="muted" style="margin:0;font-size:14px;">{{ t.med_sub }}</p>
+  </div>
+</div>
+
+<section class="cardx mb-4">
+  <h2>{{ t.add_medicine }}</h2>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label>{{ t.med_name }}</label>
+        <input class="form-control" name="name" required>
+      </div>
+      <div class="col-md-6">
+        <label>{{ t.dosage }}</label>
+        <input class="form-control" name="dosage">
+      </div>
+      <div class="col-md-6">
+        <label>{{ t.times }}</label>
+        <input class="form-control" name="times" placeholder="09:00, 21:00">
+      </div>
+      <div class="col-md-6">
+        <label>{{ t.instructions }}</label>
+        <input class="form-control" name="instructions">
+      </div>
+      <div class="col-md-6">
+        <label>{{ t.start_date }}</label>
+        <input class="form-control" type="date" name="start_date">
+      </div>
+      <div class="col-md-6">
+        <label>{{ t.end_date }}</label>
+        <input class="form-control" type="date" name="end_date">
+      </div>
+    </div>
+    <button class="btn btn-teal mt-3">{{ t.save_medicine }}</button>
+  </form>
+</section>
+
+<section class="cardx">
+  <div class="section-header">
+    <h2>{{ t.your_schedule }}</h2>
+    <span class="stat-pill">{{ items|length }} {{ t.medicines_count }}</span>
+  </div>
+  {% for m in items %}
+  <div class="listrow">
+    <div>
+      <b>{{ m.name }}</b>
+      <div class="muted">
+        {% if m.dosage %}<span class="badge badge-teal" style="margin-right:6px;">{{ m.dosage }}</span>{% endif %}
+        {% if m.times %}<span class="badge badge-blue">🕐 {{ m.times }}</span>{% endif %}
+      </div>
+      {% if m.instructions %}<div class="muted" style="margin-top:4px;font-size:13px;">📝 {{ m.instructions }}</div>{% endif %}
+    </div>
+    <form method="post" action="{{ url_for('medicine.delete', item_id=m.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-outline-danger btn-sm">{{ t.remove }}</button>
+    </form>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:40px 0;">
+    <div style="font-size:48px;margin-bottom:12px;">💊</div>
+    <p class="muted">{{ t.no_medicines_yet }}</p>
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

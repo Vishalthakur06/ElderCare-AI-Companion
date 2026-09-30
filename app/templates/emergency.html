@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Emergency · ElderCare{% endblock %}
+{% block content %}
+
+<div class="page-title">
+  <div style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(220,38,38,.15);">🆘</div>
+  <div>
+    <h1 style="margin:0;">Emergency Contacts</h1>
+    <p class="muted" style="margin:0;font-size:14px;">Quick access to your trusted contacts.</p>
+  </div>
+</div>
+
+<div class="alert alert-danger" style="font-size:15px;">
+  <b>⚠️ Need urgent help?</b> Call your local emergency number directly (112 / 108). This page does not automatically contact emergency services.
+</div>
+
+<section class="cardx mb-4">
+  <h2>➕ Add Trusted Contact</h2>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label for="name">Name</label>
+        <input class="form-control" id="name" name="name" required placeholder="Contact name">
+      </div>
+      <div class="col-md-4">
+        <label for="phone">Phone number</label>
+        <input class="form-control" id="phone" name="phone" type="tel" required placeholder="+91 98765 43210">
+      </div>
+      <div class="col-md-4">
+        <label for="relation">Relationship</label>
+        <input class="form-control" id="relation" name="relation" placeholder="e.g. Son, Doctor">
+      </div>
+    </div>
+    <button class="btn btn-danger mt-3">💾 Save Contact</button>
+  </form>
+</section>
+
+<section class="cardx">
+  <div class="section-header">
+    <h2>📞 Call a Contact</h2>
+    <span class="stat-pill">{{ items|length }} contacts</span>
+  </div>
+
+  {% for c in items %}
+  <div class="listrow">
+    <div>
+      <b>👤 {{ c.name }}</b>
+      <div class="muted">
+        {% if c.relation %}<span class="badge badge-amber" style="margin-right:6px;">{{ c.relation }}</span>{% endif %}
+        <span class="badge badge-teal">📱 {{ c.phone }}</span>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-danger btn-sm" href="tel:{{ c.phone }}">📞 Call</a>
+      <form method="post" action="{{ url_for('emergency.delete', item_id=c.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-outline-secondary btn-sm">🗑 Remove</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:40px 0;">
+    <div style="font-size:48px;margin-bottom:12px;">📞</div>
+    <p class="muted">Add a trusted contact to get started.</p>
+  </div>
+  {% endfor %}
+</section>
+
+{% endblock %}

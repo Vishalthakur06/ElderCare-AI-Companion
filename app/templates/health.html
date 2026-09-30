@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ t.health_title }} · ElderCare{% endblock %}
+{% block content %}
+
+<div class="page-title">
+  <div style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(220,38,38,.12);">❤️</div>
+  <div>
+    <h1 style="margin:0;">{{ t.health_title }}</h1>
+    <p class="muted" style="margin:0;font-size:14px;">{{ t.health_sub }}</p>
+  </div>
+</div>
+
+<section class="cardx mb-4">
+  <h2>{{ t.add_measurement }}</h2>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label>{{ t.measurement_type }}</label>
+        <select class="form-select" name="kind" required>
+          <option value="">Choose…</option>
+          <option>Blood pressure</option>
+          <option>Blood sugar</option>
+          <option>Pulse</option>
+          <option>Weight</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label>{{ t.value_label }}</label>
+        <input class="form-control" name="value" placeholder="e.g. 120/80 mmHg" required>
+      </div>
+      <div class="col-md-4">
+        <label>{{ t.notes_label }}</label>
+        <input class="form-control" name="notes">
+      </div>
+    </div>
+    <button class="btn btn-danger mt-3" style="background:linear-gradient(135deg,#e11d48,#dc2626);">{{ t.save_entry }}</button>
+  </form>
+</section>
+
+<section class="cardx">
+  <div class="section-header">
+    <h2>{{ t.history }}</h2>
+    <span class="stat-pill">{{ items|length }} {{ t.records_count }}</span>
+  </div>
+
+  {% for r in items %}
+  <div class="listrow">
+    <div>
+      <b>{% if r.kind == 'Blood pressure' %}🩸{% elif r.kind == 'Blood sugar' %}🍬{% elif r.kind == 'Pulse' %}💓{% elif r.kind == 'Weight' %}⚖️{% else %}📊{% endif %} {{ r.kind }}: {{ r.value }}</b>
+      <div class="muted">🕐 {{ r.recorded_at.strftime('%d %b %Y, %I:%M %p') }}{% if r.notes %} · 📝 {{ r.notes }}{% endif %}</div>
+    </div>
+    <form method="post" action="{{ url_for('health.delete', item_id=r.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-outline-danger btn-sm">{{ t.delete }}</button>
+    </form>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:40px 0;">
+    <div style="font-size:48px;margin-bottom:12px;">❤️</div>
+    <p class="muted">{{ t.no_health_yet }}</p>
+  </div>
+  {% endfor %}
+</section>
+<p class="notice mt-3">{{ t.notice_health }}</p>
+{% endblock %}

@@ -1,0 +1,1 @@
+// Chart.js is loaded on the health page. Extend this module to graph numeric readings after parsing units safely.

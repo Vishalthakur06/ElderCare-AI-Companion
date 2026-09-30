@@ -1,0 +1,1 @@
+// Browser notifications require permission and an active page; do not rely on them for critical medication safety.

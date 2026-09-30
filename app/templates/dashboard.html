@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · ElderCare{% endblock %}
+{% block content %}
+
+<div class="hero">
+  <div>
+    <p class="eyebrow">{{ t.dashboard_eyebrow }}</p>
+    <h1>{{ t.dashboard_hello }}, {{ current_user.name }} 👋</h1>
+    <p style="color:var(--ink2);margin:0;font-size:15px;">{{ t.dashboard_subtitle }}</p>
+  </div>
+  <a class="btn btn-danger btn-lg" href="{{ url_for('emergency.index') }}">{{ t.dashboard_sos }}</a>
+</div>
+
+<div class="grid">
+  <a class="tile tile-teal" href="{{ url_for('medicine.index') }}">
+    <div class="tile-icon">💊</div>
+    <h2>{{ t.tile_medicines }}</h2>
+    <p>{{ medicines|length }} {{ t.tile_medicines_sub }}</p>
+  </a>
+  <a class="tile tile-red" href="{{ url_for('health.index') }}">
+    <div class="tile-icon">❤️</div>
+    <h2>{{ t.tile_health }}</h2>
+    <p>{{ t.tile_health_sub }}</p>
+  </a>
+  <a class="tile tile-blue" href="{{ url_for('appointments.index') }}">
+    <div class="tile-icon">🏥</div>
+    <h2>{{ t.tile_appointments }}</h2>
+    <p>{{ appointments|length }} {{ t.tile_appointments_sub }}</p>
+  </a>
+  <a class="tile tile-amber" href="{{ url_for('emergency.index') }}">
+    <div class="tile-icon">🆘</div>
+    <h2>{{ t.tile_emergency }}</h2>
+    <p>{{ contacts|length }} {{ t.tile_emergency_sub }}</p>
+  </a>
+  <a class="tile tile-purple" href="#daily">
+    <div class="tile-icon">🌦️</div>
+    <h2>{{ t.tile_daily }}</h2>
+    <p>{{ t.tile_daily_sub }}</p>
+  </a>
+  <a class="tile tile-green" href="#daily">
+    <div class="tile-icon">🎵</div>
+    <h2>{{ t.tile_wellbeing }}</h2>
+    <p>{{ t.tile_wellbeing_sub }}</p>
+  </a>
+</div>
+
+<div class="row g-3 mt-2">
+  <div class="col-lg-6">
+    <section class="cardx">
+      <div class="section-header">
+        <h2>{{ t.medicine_list }}</h2>
+        <a href="{{ url_for('medicine.index') }}" style="font-size:13px;color:var(--teal);text-decoration:none;font-weight:600;">{{ t.view_all }}</a>
+      </div>
+      {% for m in medicines %}
+      <div class="listrow">
+        <div>
+          <b>{{ m.name }}</b>
+          <div class="muted">{{ m.dosage }} · {{ m.times }}</div>
+        </div>
+        <span class="badge badge-teal">{{ t.scheduled }}</span>
+      </div>
+      {% else %}
+      <p class="muted" style="padding:16px 0;text-align:center;">{{ t.no_medicines }}</p>
+      {% endfor %}
+    </section>
+  </div>
+  <div class="col-lg-6">
+    <section class="cardx">
+      <div class="section-header">
+        <h2>{{ t.recent_health }}</h2>
+        <a href="{{ url_for('health.index') }}" style="font-size:13px;color:var(--teal);text-decoration:none;font-weight:600;">{{ t.view_all }}</a>
+      </div>
+      {% for r in records %}
+      <div class="listrow">
+        <div>
+          <b>{{ r.kind|title }}: {{ r.value }}</b>
+          <div class="muted">{{ r.recorded_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+        </div>
+        <span class="badge badge-red">{{ t.recorded }}</span>
+      </div>
+      {% else %}
+      <p class="muted" style="padding:16px 0;text-align:center;">{{ t.no_health }}</p>
+      {% endfor %}
+    </section>
+  </div>
+</div>
+
+<section id="daily" class="mt-3">
+  <div class="row g-3">
+    <div class="col-lg-5">
+      <div class="cardx" id="weather-card" style="min-height:180px;">
+        <div id="weather-loading" style="text-align:center;padding:32px 0;color:var(--muted);">
+          <div style="font-size:36px;margin-bottom:8px;">🌍</div>
+          <p style="margin:0;font-size:14px;">{{ t.detecting }}</p>
+        </div>
+        <div id="weather-content" style="display:none;">
+          <div class="section-header" style="margin-bottom:8px;">
+            <h2 style="margin:0;">{{ t.weather_title }}</h2>
+            <span id="weather-city" class="stat-pill"></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;">
+            <div id="weather-icon" style="font-size:64px;line-height:1;"></div>
+            <div>
+              <div style="font-size:42px;font-weight:900;line-height:1;" id="weather-temp"></div>
+              <div id="weather-desc" style="color:var(--muted);font-size:14px;margin-top:2px;"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <span class="stat-pill">🤔 <span id="weather-feels"></span></span>
+            <span class="stat-pill">💧 <span id="weather-humidity"></span>%</span>
+            <span class="stat-pill">💨 <span id="weather-wind"></span> km/h</span>
+          </div>
+        </div>
+        <div id="weather-error" style="display:none;text-align:center;padding:24px 0;">
+          <div style="font-size:32px;margin-bottom:8px;">😕</div>
+          <p id="weather-error-msg" style="margin:0;font-size:14px;color:var(--muted);"></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="cardx" id="news-card" style="min-height:180px;">
+        <div id="news-loading" style="text-align:center;padding:32px 0;color:var(--muted);">
+          <div style="font-size:36px;margin-bottom:8px;">📰</div>
+          <p style="margin:0;font-size:14px;">{{ t.loading_news }}</p>
+        </div>
+        <div id="news-content" style="display:none;">
+          <h2>{{ t.news_title }}</h2>
+          <div id="news-list"></div>
+        </div>
+        <div id="news-error" style="display:none;text-align:center;padding:24px 0;">
+          <div style="font-size:32px;margin-bottom:8px;">📰</div>
+          <p id="news-error-msg" style="margin:0;font-size:14px;color:var(--muted);"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p class="notice mt-3">{{ t.notice_health }}</p>
+
+<script>
+(function () {
+  function showWeather(w) {
+    document.getElementById("weather-loading").style.display = "none";
+    if (!w.available) {
+      document.getElementById("weather-error-msg").textContent = w.reason === "no_key"
+        ? "Weather API key not configured." : "Could not load weather.";
+      document.getElementById("weather-error").style.display = "block";
+      return;
+    }
+    document.getElementById("weather-city").textContent = "📍 " + w.city;
+    document.getElementById("weather-temp").textContent = w.temp + "°C";
+    document.getElementById("weather-desc").textContent = w.desc;
+    document.getElementById("weather-icon").textContent = w.emoji;
+    document.getElementById("weather-feels").textContent = w.feels + "°C";
+    document.getElementById("weather-humidity").textContent = w.humidity;
+    document.getElementById("weather-wind").textContent = w.wind;
+    document.getElementById("weather-content").style.display = "block";
+  }
+  function showNews(n) {
+    document.getElementById("news-loading").style.display = "none";
+    if (!n.available || !n.articles.length) {
+      document.getElementById("news-error-msg").textContent = n.reason === "no_key"
+        ? "News API key not configured." : "Could not load news.";
+      document.getElementById("news-error").style.display = "block";
+      return;
+    }
+    var list = document.getElementById("news-list");
+    n.articles.forEach(function (a) {
+      var row = document.createElement("div");
+      row.className = "listrow";
+      row.innerHTML = '<div style="flex:1;"><a href="' + a.url + '" target="_blank" rel="noopener" style="color:var(--ink);text-decoration:none;font-weight:600;font-size:14px;line-height:1.4;">' + a.title + '</a><div class="muted" style="font-size:12px;margin-top:3px;">📡 ' + a.source + '</div></div><a href="' + a.url + '" target="_blank" rel="noopener" style="color:var(--teal);font-size:12px;font-weight:600;white-space:nowrap;">Read →</a>';
+      list.appendChild(row);
+    });
+    document.getElementById("news-content").style.display = "block";
+  }
+  function fetchDaily(lat, lon) {
+    fetch("/api/daily?lat=" + lat + "&lon=" + lon)
+      .then(function (r) { return r.json(); })
+      .then(function (data) { showWeather(data.weather); showNews(data.news); })
+      .catch(function () {
+        ["weather", "news"].forEach(function (k) {
+          document.getElementById(k + "-loading").style.display = "none";
+          document.getElementById(k + "-error-msg").textContent = "Network error. Please refresh.";
+          document.getElementById(k + "-error").style.display = "block";
+        });
+      });
+  }
+  if (!navigator.geolocation) {
+    document.getElementById("weather-loading").style.display = "none";
+    document.getElementById("weather-error-msg").textContent = "Geolocation not supported.";
+    document.getElementById("weather-error").style.display = "block";
+    fetchDaily(20.5937, 78.9629);
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    function (pos) { fetchDaily(pos.coords.latitude, pos.coords.longitude); },
+    function () {
+      document.getElementById("weather-loading").style.display = "none";
+      document.getElementById("weather-error-msg").textContent = "Location access denied.";
+      document.getElementById("weather-error").style.display = "block";
+      fetchDaily(20.5937, 78.9629);
+    },
+    { timeout: 8000 }
+  );
+}());
+</script>
+{% endblock %}
