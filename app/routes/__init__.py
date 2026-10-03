@@ -7,4 +7,5 @@ def register_blueprints(app):
     from .emergency import bp as emergency
     from .caregiver import bp as caregiver
     from .settings import bp as settings
-    for b in (auth,dashboard,medicine,health,appointments,emergency,caregiver,settings): app.register_blueprint(b)
+    from .ai import bp as ai
+    for b in (auth,dashboard,medicine,health,appointments,emergency,caregiver,settings,ai): app.register_blueprint(b)

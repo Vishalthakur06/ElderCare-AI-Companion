@@ -32,10 +32,9 @@
     <h2>{{ t.tile_emergency }}</h2>
     <p>{{ contacts|length }} {{ t.tile_emergency_sub }}</p>
   </a>
-  <a class="tile tile-purple" href="#daily">
-    <div class="tile-icon">🌦️</div>
-    <h2>{{ t.tile_daily }}</h2>
-    <p>{{ t.tile_daily_sub }}</p>
+  <a class="tile tile-purple" href="{{ url_for('ai.index') }}">
+    <div class="tile-icon">🤖</div>
+    <p>Health analysis & chatbot</p>
   </a>
   <a class="tile tile-green" href="#wellbeing">
     <div class="tile-icon">🎵</div>

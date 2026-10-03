@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+{% block title %}AI Assistant · ElderCare{% endblock %}
+{% block content %}
+
+<div class="hero" style="background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(8,145,178,.1));">
+  <div>
+    <p class="eyebrow">Powered by ElderCare AI Engine</p>
+    <h1>🤖 AI Health Assistant</h1>
+    <p style="color:var(--ink2);margin:0;font-size:15px;">Health score · Risk analysis · Trend charts · Medicine safety · Smart reminders · Chatbot</p>
+  </div>
+  <div style="background:var(--grad-blue);border-radius:var(--radius-lg);padding:16px 24px;color:#fff;text-align:center;box-shadow:0 8px 24px rgba(37,99,235,.3);">
+    <div style="font-size:40px;">🧠</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;margin-top:4px;">AI ENGINE</div>
+  </div>
+</div>
+
+<!-- ── 1. AI Health Score ── -->
+<section class="cardx mb-4">
+  <div class="section-header">
+    <h2>🎯 AI Health Score</h2>
+    {% if health_score.score is not none %}
+    <span class="stat-pill" style="color:{{ health_score.color }};border-color:{{ health_score.color }};">{{ health_score.grade }}</span>
+    {% endif %}
+  </div>
+
+  {% if health_score.score is not none %}
+  <div style="display:flex;align-items:center;gap:32px;flex-wrap:wrap;margin-bottom:20px;">
+    <!-- Score Circle -->
+    <div style="position:relative;width:130px;height:130px;flex-shrink:0;">
+      <svg width="130" height="130" style="transform:rotate(-90deg);">
+        <circle cx="65" cy="65" r="55" fill="none" stroke="var(--line)" stroke-width="12"/>
+        <circle cx="65" cy="65" r="55" fill="none" stroke="{{ health_score.color }}" stroke-width="12"
+          stroke-dasharray="{{ (health_score.score / 100 * 345)|round }} 345"
+          stroke-linecap="round"/>
+      </svg>
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <span style="font-size:32px;font-weight:900;color:{{ health_score.color }};">{{ health_score.score }}</span>
+        <span style="font-size:11px;color:var(--muted);font-weight:600;">/ 100</span>
+      </div>
+    </div>
+    <div style="flex:1;">
+      <p style="font-size:15px;margin-bottom:16px;color:var(--ink2);">{{ health_score.summary }}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        {% for b in health_score.breakdown %}
+        <div style="background:var(--surface2);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;min-width:120px;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">{{ b.kind }} ({{ b.weight }}%)</div>
+          <div style="font-weight:700;font-size:14px;color:
+            {% if b.level=='critical' %}var(--red)
+            {% elif b.level=='warning' %}var(--amber)
+            {% else %}var(--green){% endif %};">{{ b.label }}</div>
+          <div style="margin-top:6px;height:4px;background:var(--line);border-radius:4px;">
+            <div style="height:4px;border-radius:4px;width:{{ b.points }}%;background:
+              {% if b.level=='critical' %}var(--red)
+              {% elif b.level=='warning' %}var(--amber)
+              {% else %}var(--green){% endif %};transition:width .6s;"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:32px 0;">
+    <div style="font-size:48px;margin-bottom:12px;">🎯</div>
+    <p class="muted">{{ health_score.summary }}</p>
+    <a href="{{ url_for('health.index') }}" class="btn btn-teal mt-3">Add Health Records →</a>
+  </div>
+  {% endif %}
+</section>
+
+<!-- ── 2. Health Risk Analysis ── -->
+{% if analyses %}
+<section class="cardx mb-4">
+  <div class="section-header">
+    <h2>📊 Health Risk Analysis</h2>
+    <span class="stat-pill">{{ analyses|length }} vitals</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:4px;">
+    {% for a in analyses %}
+    <div style="border-radius:var(--radius);padding:18px;border:1.5px solid
+      {% if a.level=='critical' %}rgba(220,38,38,.3);background:rgba(220,38,38,.05)
+      {% elif a.level=='warning' %}rgba(217,119,6,.3);background:rgba(217,119,6,.05)
+      {% else %}rgba(5,150,105,.3);background:rgba(5,150,105,.05){% endif %};">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-weight:700;font-size:14px;">{{ a.kind }}</span>
+        <span class="badge {% if a.level=='critical' %}badge-red{% elif a.level=='warning' %}badge-amber{% else %}badge-green{% endif %}">{{ a.label }}</span>
+      </div>
+      <div style="font-size:24px;font-weight:900;margin-bottom:4px;color:{% if a.level=='critical' %}var(--red){% elif a.level=='warning' %}var(--amber){% else %}var(--green){% endif %};">{{ a.value }}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">📅 {{ a.date }}</div>
+      <div style="font-size:13px;line-height:1.5;color:var(--ink2);">{{ a.advice }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ── 3. Health Trend Charts ── -->
+{% if chart_data %}
+<section class="cardx mb-4">
+  <div class="section-header">
+    <h2>📈 Health Trends</h2>
+    <span class="stat-pill">{{ chart_data|length }} vitals tracked</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:8px;">
+    {% for kind, cd in chart_data.items() %}
+    {% if cd.data|length >= 2 %}
+    <div style="background:var(--surface2);border:1px solid var(--line);border-radius:var(--radius);padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <span style="font-weight:700;font-size:14px;">{{ kind }}</span>
+        <span class="badge {% if cd.trend=='improving' %}badge-green{% elif cd.trend=='worsening' %}badge-red{% else %}badge-teal{% endif %}">
+          {% if cd.trend=='improving' %}↓ Improving{% elif cd.trend=='worsening' %}↑ Worsening{% else %}→ Stable{% endif %}
+        </span>
+      </div>
+      <canvas id="chart-{{ loop.index }}" height="120"></canvas>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ── 4. Medicine Refill Alerts ── -->
+{% if refill_alerts %}
+<section class="cardx mb-4">
+  <div class="section-header">
+    <h2>💊 Medicine Refill Alerts</h2>
+    <span class="stat-pill badge-red">{{ refill_alerts|length }} alerts</span>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+    {% for a in refill_alerts %}
+    <div style="display:flex;align-items:center;gap:14px;padding:14px;border-radius:var(--radius);border:1.5px solid
+      {% if a.urgency=='expired' or a.urgency=='critical' %}rgba(220,38,38,.3);background:rgba(220,38,38,.05)
+      {% else %}rgba(217,119,6,.3);background:rgba(217,119,6,.05){% endif %};">
+      <div style="font-size:28px;">{% if a.urgency=='expired' %}❌{% elif a.urgency=='critical' %}🚨{% else %}⚠️{% endif %}</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:15px;">{{ a.name }}</div>
+        <div style="font-size:13px;color:var(--ink2);margin-top:2px;">{{ a.message }}</div>
+      </div>
+      <a href="{{ url_for('medicine.index') }}" class="btn btn-sm {% if a.urgency=='warning' %}btn-outline-secondary{% else %}btn-danger{% endif %}">Manage →</a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ── 5. Appointment Priority ── -->
+{% if appt_priority %}
+<section class="cardx mb-4">
+  <div class="section-header">
+    <h2>📅 Appointment Priority</h2>
+    <span class="stat-pill">{{ appt_priority|length }} appointments</span>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:0;">
+    {% for a in appt_priority %}
+    <div class="listrow">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;">
+        <div style="width:44px;height:44px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:
+          {% if a.priority=='urgent' %}rgba(220,38,38,.1)
+          {% elif a.priority=='soon' %}rgba(217,119,6,.1)
+          {% else %}rgba(5,150,105,.1){% endif %};">🏥</div>
+        <div>
+          <div style="font-weight:700;font-size:15px;">Dr. {{ a.doctor }}</div>
+          <div class="muted" style="font-size:13px;">
+            {% if a.days_away < 0 %}⏰ {{ a.days_away|abs }} days ago
+            {% elif a.days_away == 0 %}⏰ Today!
+            {% elif a.days_away == 1 %}⏰ Tomorrow
+            {% else %}⏰ In {{ a.days_away }} days{% endif %}
+            {% if a.clinic %} · 🏥 {{ a.clinic }}{% endif %}
+          </div>
+          {% if a.purpose %}<div style="font-size:12px;color:var(--muted);">📝 {{ a.purpose }}</div>{% endif %}
+        </div>
+      </div>
+      <span class="badge {% if a.priority=='urgent' %}badge-red{% elif a.priority=='soon' %}badge-amber{% else %}badge-green{% endif %}">{{ a.priority_label }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ── 6. Medicine Interaction Checker ── -->
+<section class="cardx mb-4">
+  <div class="section-header">
+    <h2>⚗️ Medicine Interaction Check</h2>
+    <span class="stat-pill">{{ medicines|length }} medicines</span>
+  </div>
+  {% if interactions %}
+  <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+    {% for w in interactions %}
+    <div style="border-radius:var(--radius);padding:14px;border-left:4px solid {% if w.severity=='High' %}var(--red){% else %}var(--amber){% endif %};background:{% if w.severity=='High' %}rgba(220,38,38,.05){% else %}rgba(217,119,6,.05){% endif %};">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span>{% if w.severity=='High' %}🚨{% else %}⚠️{% endif %}</span>
+        <span class="badge {% if w.severity=='High' %}badge-red{% else %}badge-amber{% endif %}">{{ w.severity }} Risk</span>
+        <span style="font-size:13px;color:var(--muted);">{{ w.drugs|join(' + ')|title }}</span>
+      </div>
+      <p style="margin:0;font-size:13px;color:var(--ink2);">{{ w.message }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% elif medicines %}
+  <div style="text-align:center;padding:20px 0;">
+    <div style="font-size:36px;margin-bottom:8px;">✅</div>
+    <p class="muted">No known interactions detected among your {{ medicines|length }} medicines.</p>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:20px 0;">
+    <p class="muted">No medicines added. <a href="{{ url_for('medicine.index') }}" style="color:var(--teal);">Add medicines</a> to check interactions.</p>
+  </div>
+  {% endif %}
+</section>
+
+<!-- ── 7. AI Chatbot ── -->
+<section class="cardx">
+  <h2>💬 AI Health Chatbot</h2>
+  <p class="muted" style="font-size:14px;margin-bottom:16px;">Describe symptoms or ask a health question in English or Hindi.</p>
+
+  <div id="chat-window" style="height:320px;overflow-y:auto;border:1.5px solid var(--line);border-radius:var(--radius);padding:16px;background:var(--surface2);display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+    <div class="chat-msg ai">
+      <div class="chat-bubble ai-bubble">👋 Hello! I'm your ElderCare AI Assistant. Tell me your symptoms or health concerns and I'll guide you.</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;">
+    <input id="chat-input" class="form-control" placeholder="e.g. I have a headache, my BP is high…" autocomplete="off" style="flex:1;">
+    <button onclick="sendChat()" class="btn btn-primary" id="chat-send">Send 🚀</button>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+    <span style="font-size:12px;color:var(--muted);align-self:center;">Quick:</span>
+    {% for q in ["I feel dizzy","My BP is high","I have chest pain","I cannot sleep","My sugar is high","I have a headache","I feel stressed"] %}
+    <button onclick="quickAsk('{{ q }}')" class="btn btn-outline-secondary btn-sm">{{ q }}</button>
+    {% endfor %}
+  </div>
+</section>
+
+<p class="notice mt-3">⚠️ AI analysis is for informational purposes only and is not a medical diagnosis. Always consult a qualified healthcare professional.</p>
+
+<style>
+.chat-bubble{max-width:78%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;}
+.ai-bubble{background:var(--surface);border:1px solid var(--line);color:var(--ink);border-bottom-left-radius:4px;align-self:flex-start;}
+.user-bubble{background:var(--grad-blue);color:#fff;border-bottom-right-radius:4px;align-self:flex-end;margin-left:auto;}
+.chat-msg{display:flex;flex-direction:column;}
+.chat-msg.user{align-items:flex-end;}
+.chat-msg.ai{align-items:flex-start;}
+.typing-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite;}
+.typing-dot:nth-child(2){animation-delay:.2s;}
+.typing-dot:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// ── Trend Charts ──
+var chartData = {{ chart_data | tojson }};
+var colors = {"Blood Pressure":"#0891b2","Blood Sugar":"#7c3aed","Pulse":"#dc2626","Weight":"#059669"};
+var idx = 1;
+for (var kind in chartData) {
+  var cd = chartData[kind];
+  if (cd.data.length < 2) { idx++; continue; }
+  var ctx = document.getElementById("chart-" + idx);
+  if (!ctx) { idx++; continue; }
+  var color = colors[kind] || "#0891b2";
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: cd.labels,
+      datasets: [{
+        data: cd.data,
+        borderColor: color,
+        backgroundColor: color + "18",
+        borderWidth: 2.5,
+        pointBackgroundColor: color,
+        pointRadius: 4,
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: "rgba(128,128,128,.1)" }, ticks: { font: { size: 11 } } },
+        y: { grid: { color: "rgba(128,128,128,.1)" }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+  idx++;
+}
+
+// ── Chatbot ──
+var chatWindow = document.getElementById("chat-window");
+function scrollBottom(){ chatWindow.scrollTop = chatWindow.scrollHeight; }
+function addMsg(text, who){
+  var div = document.createElement("div");
+  div.className = "chat-msg " + who;
+  var b = document.createElement("div");
+  b.className = "chat-bubble " + (who==="ai" ? "ai-bubble" : "user-bubble");
+  b.textContent = text;
+  div.appendChild(b);
+  chatWindow.appendChild(div);
+  scrollBottom();
+}
+function addTyping(){
+  var div = document.createElement("div");
+  div.className = "chat-msg ai"; div.id = "typing-indicator";
+  div.innerHTML = '<div class="chat-bubble ai-bubble" style="padding:12px 16px;"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
+  chatWindow.appendChild(div); scrollBottom();
+}
+function removeTyping(){ var t=document.getElementById("typing-indicator"); if(t) t.remove(); }
+function sendChat(){
+  var input = document.getElementById("chat-input");
+  var msg = input.value.trim(); if(!msg) return;
+  input.value = ""; addMsg(msg, "user"); addTyping();
+  fetch("/ai/chat",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","X-CSRFToken":"{{ csrf_token() }}"},
+    body:JSON.stringify({message:msg})
+  }).then(function(r){return r.json();}).then(function(d){removeTyping();addMsg(d.response,"ai");})
+    .catch(function(){removeTyping();addMsg("Sorry, something went wrong. Please try again.","ai");});
+}
+function quickAsk(q){ document.getElementById("chat-input").value=q; sendChat(); }
+document.getElementById("chat-input").addEventListener("keydown",function(e){if(e.key==="Enter")sendChat();});
+</script>
+
+{% endblock %}
